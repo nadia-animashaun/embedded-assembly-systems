@@ -1,0 +1,60 @@
+        .section .text
+        .globl DisplayByteList
+
+# Subroutine: DisplayByteList(list, n)
+# Inputs:
+#   r4 - Address of the list (base pointer)
+#   r5 - Number of elements in the list (n)
+# Description:
+#   Prints elements of the list in the format: [XX] [**] [YY] ... 
+#   where "**" replaces zero values.
+
+DisplayByteList:
+        # Check if n == 0 (Empty list)
+        beq     r5, zero, EndDisplay   # If n == 0, return immediately
+
+        addi    r6, zero, 0            # r6 = index = 0 (loop counter)
+        add     r7, r4, zero           # r7 = list pointer (base address)
+
+Loop:
+        # Load a byte from the list (zero-extend it)
+        ldbu    r8, 0(r7)              # Load byte from list[index]
+
+        # Print opening bracket "["
+        addi    r9, zero, '['
+        call    PrintChar
+
+        # Check if byte == 0
+        beq     r8, zero, PrintAsterisks
+
+        # Print the hex value of the byte
+        call    PrintHexByte
+        br      PrintClosingBracket
+
+PrintAsterisks:
+        # Print "**" for zero values
+        addi    r9, zero, '*'
+        call    PrintChar
+        call    PrintChar
+
+PrintClosingBracket:
+        # Print closing bracket "] "
+        addi    r9, zero, ']'
+        call    PrintChar
+        addi    r9, zero, ' '
+        call    PrintChar
+
+        # Move to next byte
+        addi    r6, r6, 1      # index++
+        addi    r7, r7, 1      # list pointer++
+
+        # Check if index < n
+        blt     r6, r5, Loop
+
+        # Print newline
+        addi    r9, zero, '\n'
+        call    PrintChar
+
+EndDisplay:
+        ret     # Return from subroutine
+
